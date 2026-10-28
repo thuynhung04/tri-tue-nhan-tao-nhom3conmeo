@@ -9,7 +9,7 @@ require_once __DIR__ . '/rules.php';
 
 $rules = getRules();
 
-// Chỉ trả về thông tin cần thiết cho UI
+// Chỉ trả về thông tin cần thiết cho giao diện
 $output = array_map(fn($r) => [
     'id'             => $r['id'],
     'name'           => $r['name'],
