@@ -1,0 +1,12 @@
+# Bật CORS cho toàn bộ thư mục
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Accept"
+
+# Xử lý OPTIONS preflight
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# PHP encoding
+AddDefaultCharset UTF-8

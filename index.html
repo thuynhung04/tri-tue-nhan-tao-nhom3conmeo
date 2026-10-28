@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ Tư Vấn Lộ Trình Học Tập</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Cảnh báo nếu mở file trực tiếp (không qua localhost) -->
+<div id="file-warning" style="display:none;background:#fef2f2;color:#dc2626;padding:.9rem 1.5rem;font-size:.9rem;font-weight:600;border-bottom:2px solid #fca5a5;text-align:center">
+  ⚠️ Bạn đang mở file trực tiếp. Vui lòng truy cập qua:
+  <a href="http://localhost/expert-system/" style="color:#2563eb;text-decoration:underline">
+    http://localhost/expert-system/
+  </a>
+  để hệ thống hoạt động đúng.
+</div>
+<script>
+  if (location.protocol === 'file:') {
+    document.getElementById('file-warning').style.display = 'block';
+  }
+</script>
+
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <header class="app-header">
+    <h1>🎓 Hệ Tư Vấn Lộ Trình Học Tập</h1>
+    <p>Hệ thống chuyên gia dựa trên luật IF–THEN | Forward &amp; Backward Chaining</p>
+  </header>
+
+  <!-- ── TABS ── -->
+  <div class="tabs">
+    <button class="tab-btn" :class="{ active: activeTab === 'input' }"    @click="setTab('input')">📝 Nhập Hồ Sơ</button>
+    <button class="tab-btn" :class="{ active: activeTab === 'result' }"   @click="setTab('result')">📋 Kết Quả Tư Vấn</button>
+    <button class="tab-btn" :class="{ active: activeTab === 'students' }" @click="setTab('students')">👥 Hồ Sơ Mẫu</button>
+    <button class="tab-btn" :class="{ active: activeTab === 'rules' }"    @click="setTab('rules')">📖 Tập Luật</button>
+  </div>
+
+  <div class="main">
+
+    <!-- ════════════════════════════════════
+         TAB 1: NHẬP HỒ SƠ
+    ════════════════════════════════════ -->
+    <div class="tab-content" :class="{ active: activeTab === 'input' }">
+
+      <div class="alert alert-danger" v-if="error">⚠️ {{ error }}</div>
+
+      <div class="grid-2">
+        <!-- Cột trái: Thông tin cơ bản -->
+        <div>
+          <div class="card">
+            <div class="card-title">📊 Thông Tin Học Tập</div>
+
+            <div class="form-group">
+              <label class="form-label">Điểm Trung Bình (0 – 10) *</label>
+              <input class="form-control" type="number" v-model="form.diem_tb"
+                     min="0" max="10" step="0.1" placeholder="Ví dụ: 7.5" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Số Tín Chỉ Đăng Ký Học Kỳ Này</label>
+              <input class="form-control" type="number" v-model="form.so_tin_chi_dang_ky"
+                     min="0" max="60" placeholder="Ví dụ: 18" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tín Chỉ Tích Lũy</label>
+              <input class="form-control" type="number" v-model="form.tin_chi_tich_luy"
+                     min="0" max="160" placeholder="Ví dụ: 60" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Kỹ Năng Lập Trình</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_lap_trinh" value="tot" /> Tốt</label>
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_lap_trinh" value="trung_binh" /> Trung bình</label>
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_lap_trinh" value="yeu" /> Yếu</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Kỹ Năng Toán</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_toan" value="tot" /> Tốt</label>
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_toan" value="trung_binh" /> Trung bình</label>
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_toan" value="yeu" /> Yếu</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Kỹ Năng Mềm</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_mem" value="tot" /> Tốt</label>
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_mem" value="trung_binh" /> Trung bình</label>
+                <label class="radio-label"><input type="radio" v-model="form.ky_nang_mem" value="yeu" /> Yếu</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Sở Thích / Định Hướng</label>
+              <select class="form-control" v-model="form.so_thich">
+                <option value="ai">🤖 Trí tuệ nhân tạo (AI/ML)</option>
+                <option value="data">📊 Khoa học dữ liệu (Data Science)</option>
+                <option value="web">🌐 Lập trình web (Web Dev)</option>
+                <option value="software">💻 Kỹ nghệ phần mềm (SE)</option>
+                <option value="security">🔒 Bảo mật (Cybersecurity)</option>
+                <option value="system">⚙️ Hệ thống / DevOps</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Môn học + Phương pháp -->
+        <div>
+          <div class="card">
+            <div class="card-title">📚 Tình Trạng Môn Học</div>
+
+            <div class="form-group">
+              <label class="form-label">Kỹ Năng &amp; Công Nghệ</label>
+              <div class="check-group">
+                <label class="check-label"><input type="checkbox" v-model="form.biet_html" /> HTML/CSS</label>
+                <label class="check-label"><input type="checkbox" v-model="form.biet_python" /> Python</label>
+                <label class="check-label"><input type="checkbox" v-model="form.biet_oop" /> OOP</label>
+                <label class="check-label"><input type="checkbox" v-model="form.biet_mang" /> Mạng MT</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Môn Chưa Đạt (Còn Nợ)</label>
+              <div class="check-group">
+                <label class="check-label"><input type="checkbox" v-model="form.chua_dat_nhap_mon" /> Nhập môn LT</label>
+                <label class="check-label"><input type="checkbox" v-model="form.chua_dat_toan_cao_cap" /> Toán cao cấp</label>
+                <label class="check-label"><input type="checkbox" v-model="form.chua_dat_ctdl" /> Cấu trúc DL &amp; GT</label>
+                <label class="check-label"><input type="checkbox" v-model="form.chua_dat_ktlt" /> Kỹ thuật lập trình</label>
+                <label class="check-label"><input type="checkbox" v-model="form.chua_dat_oop_mon" /> Lập trình HĐT</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Môn Đã Hoàn Thành</label>
+              <div class="check-group">
+                <label class="check-label"><input type="checkbox" v-model="form.hoan_thanh_nhap_mon" /> Nhập môn LT</label>
+                <label class="check-label"><input type="checkbox" v-model="form.hoan_thanh_toan_cao_cap" /> Toán cao cấp</label>
+                <label class="check-label"><input type="checkbox" v-model="form.hoan_thanh_ktlt" /> Kỹ thuật lập trình</label>
+                <label class="check-label"><input type="checkbox" v-model="form.hoan_thanh_oop" /> Lập trình HĐT</label>
+                <label class="check-label"><input type="checkbox" v-model="form.hoan_thanh_ctdl" /> Cấu trúc DL &amp; GT</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Môn Muốn Học Kỳ Tới</label>
+              <div class="check-group">
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_xstk" /> XS Thống kê</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_mmt" /> Mạng máy tính</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_hdt" /> Hệ điều hành</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_csdl" /> Cơ sở dữ liệu</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_ltdt" /> Lý thuyết đồ thị</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_cnpm" /> Công nghệ phần mềm</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_ttnt" /> Trí tuệ nhân tạo</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_bmtt" /> Bảo mật thông tin</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_ptud_desktop" /> Phát triển ứng dụng desktop</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_java" /> Công nghệ Java</label>
+                <label class="check-label"><input type="checkbox" v-model="form.muon_hoc_mobile" /> Lập trình thiết bị di động</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">⚙️ Phương Pháp Suy Luận</div>
+            <div class="grid-2" style="margin-bottom:1rem">
+              <div class="method-card" :class="{ active: method === 'forward' }" @click="method = 'forward'">
+                <h4>⏩ Forward Chaining</h4>
+                <p>Suy luận tiến: từ dữ kiện → kết luận</p>
+              </div>
+              <div class="method-card" :class="{ active: method === 'backward' }" @click="method = 'backward'">
+                <h4>⏪ Backward Chaining</h4>
+                <p>Suy luận lùi: từ mục tiêu → điều kiện</p>
+              </div>
+            </div>
+
+            <div class="form-group" v-if="method === 'backward'">
+              <label class="form-label">Mục Tiêu Cần Chứng Minh</label>
+              <select class="form-control" v-model="goalBC">
+                <option v-for="g in GOAL_OPTIONS" :key="g.value" :value="g.value">{{ g.label }}</option>
+              </select>
+            </div>
+
+            <div style="display:flex; gap:.8rem; flex-wrap:wrap; margin-top:.5rem">
+              <button class="btn btn-primary" @click="runInference" :disabled="loading">
+                <span v-if="loading" class="spinner"></span>
+                <span v-else>🔍</span>
+                {{ loading ? 'Đang xử lý...' : 'Tư Vấn Ngay' }}
+              </button>
+              <button class="btn btn-secondary" @click="resetForm">🔄 Nhập Lại</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         TAB 2: KẾT QUẢ
+    ════════════════════════════════════ -->
+    <div class="tab-content" :class="{ active: activeTab === 'result' }">
+
+      <!-- Chưa có kết quả -->
+      <div class="card result-empty" v-if="!result">
+        <div class="icon">🔍</div>
+        <p>Chưa có kết quả. Hãy nhập hồ sơ và nhấn <strong>"Tư Vấn Ngay"</strong>.</p>
+      </div>
+
+      <template v-if="result">
+
+        <!-- ── Tóm tắt văn nói ── -->
+        <div class="card" style="border-left:5px solid var(--primary); background:#f5f3ff;">
+          <div class="card-title" style="color:var(--primary)">💬 Nhận Xét Tổng Hợp</div>
+          <p style="font-size:1rem; font-weight:700; color:#3730a3; line-height:1.7;">
+            {{ result.human_summary }}
+          </p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-num">{{ result.total_activated }}</div>
+            <div class="stat-lbl">Luật kích hoạt</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">{{ result.recommendations.length }}</div>
+            <div class="stat-lbl">Khuyến nghị</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">{{ result.warnings.length }}</div>
+            <div class="stat-lbl">Cảnh báo</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" style="text-transform:uppercase;font-size:1rem">
+              {{ result.method === 'forward' ? '⏩ Forward' : '⏪ Backward' }}
+            </div>
+            <div class="stat-lbl">Phương pháp</div>
+          </div>
+          <div class="stat-box" v-if="result.method === 'backward'">
+            <div class="stat-num" style="font-size:1rem">{{ result.proved ? '✅ Đúng' : '❌ Sai' }}</div>
+            <div class="stat-lbl">Mục tiêu được chứng minh</div>
+          </div>
+        </div>
+
+        <!-- Cảnh báo nổi bật -->
+        <div v-if="result.warnings.length" class="alert alert-danger">
+          🚨 <strong>Cảnh báo:</strong> {{ result.warnings.join(' | ') }}
+        </div>
+
+        <div class="grid-2">
+          <!-- Khuyến nghị -->
+          <div>
+            <div class="card">
+              <div class="card-title">💡 Khuyến Nghị</div>
+              <div v-if="result.recommendations.length === 0" style="color:var(--text-muted);font-size:.9rem">
+                Không có khuyến nghị nào được kích hoạt với hồ sơ này.
+              </div>
+              <div v-for="rec in result.recommendations" :key="rec.rule_id"
+                   class="recommendation-item" :class="'cat-' + rec.category">
+                <span class="cat-icon">{{ getCatMeta(rec.category).icon }}</span>
+                <div>
+                  <div class="rec-rule">{{ rec.rule_id }} · {{ getCatMeta(rec.category).label }}</div>
+                  <div class="rec-text">{{ rec.text }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Luật đã kích hoạt -->
+          <div>
+            <div class="card">
+              <div class="card-title">⚡ Luật Đã Kích Hoạt</div>
+              <div v-if="result.activated_rules.length === 0" style="color:var(--text-muted);font-size:.9rem">
+                Không có luật nào thỏa điều kiện.
+              </div>
+              <div v-for="rule in result.activated_rules" :key="rule.id"
+                   style="padding:.7rem;border:1px solid var(--border);border-radius:9px;margin-bottom:.6rem">
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+                  <span class="badge">{{ rule.id }}</span>
+                  <span style="font-weight:700;font-size:.9rem">{{ rule.name }}</span>
+                </div>
+                <div style="font-size:.78rem;color:var(--text-muted)">
+                  📌 Điều kiện: <code>{{ rule.explanation }}</code>
+                </div>
+                <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">
+                  → Kết luận: <code>{{ rule.conclusion }}</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chain Trace – luôn hiển thị -->
+        <div class="card">
+          <div class="card-title">🔍 Quá Trình Suy Luận (Chain Trace)</div>
+          <div class="trace-box" v-html="formattedTrace(result.chain_trace)"></div>
+        </div>
+
+      </template>
+    </div>
+
+    <!-- ════════════════════════════════════
+         TAB 3: HỒ SƠ MẪU
+    ════════════════════════════════════ -->
+    <div class="tab-content" :class="{ active: activeTab === 'students' }">
+      <div class="section-title">👥 5 Hồ Sơ Sinh Viên Mẫu</div>
+      <p style="color:var(--text-muted);margin-bottom:1.2rem;font-size:.9rem">
+        Nhấn vào một hồ sơ để tự động điền vào form nhập liệu.
+      </p>
+      <div class="grid-3">
+        <div v-for="sv in students" :key="sv.id"
+             class="student-card" @click="loadStudent(sv)">
+          <div class="student-avatar">{{ studentInitial(sv.name) }}</div>
+          <div class="student-name">{{ sv.name }}</div>
+          <div class="student-desc">{{ sv.description }}</div>
+          <span :class="studentBadgeClass(sv)">{{ studentBadgeLabel(sv) }}</span>
+          <div style="margin-top:.7rem;font-size:.78rem;color:var(--text-muted)">
+            Sở thích: <strong>{{ sv.facts.so_thich }}</strong> ·
+            Kĩ năng lập trình: <strong>{{ sv.facts.ky_nang_lap_trinh }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         TAB 4: TẬP LUẬT
+    ════════════════════════════════════ -->
+    <div class="tab-content" :class="{ active: activeTab === 'rules' }">
+      <div class="section-title">📖 Tập Luật IF–THEN ({{ allRules.length }} Luật)</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="rules-table">
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th>Tên Luật</th>
+              <th>Điều Kiện (IF)</th>
+              <th>Kết Luận (THEN)</th>
+              <th>Khuyến Nghị</th>
+              <th style="width:80px">Ưu Tiên</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="rule in allRules" :key="rule.id">
+              <td class="rule-id">{{ rule.id }}</td>
+              <td style="font-weight:600;font-size:.83rem">{{ rule.name }}</td>
+              <td>
+                <div v-for="(c, i) in rule.conditions" :key="i"
+                     style="font-family:monospace;font-size:.75rem;color:#6d28d9">
+                  {{ c }}{{ i < rule.conditions.length-1 ? ' AND' : '' }}
+                </div>
+              </td>
+              <td style="font-family:monospace;font-size:.75rem;color:#059669">{{ rule.conclusion }}</td>
+              <td style="font-size:.8rem">{{ rule.recommendation }}</td>
+              <td style="text-align:center">
+                <span class="badge" :class="{
+                  'badge-red':    rule.priority >= 5,
+                  'badge-yellow': rule.priority === 3 || rule.priority === 4,
+                  'badge-green':  rule.priority <= 2,
+                }">{{ rule.priority }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
